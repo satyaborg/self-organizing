@@ -1,0 +1,13 @@
+jupyter_client
+nbconvert
+nbformat
+torch
+torchvision
+seaborn
+pandas
+matplotlib
+numpy
+scipy
+graphviz
+sklearn
+pillow==6.2.2

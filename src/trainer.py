@@ -47,10 +47,10 @@ class Trainer(object):
         # AE network
         self.h = 0
         self.w = 0
-        self.start_epoch = 0
-        self.hyperparams = config["hyperparams"].get("meta_network")
-        self.epochs = self.hyperparams.get("epochs", 10)
         self.autoencs = {}
+        self.start_epoch = 0
+        self.hyperparams = config["hyperparams"].get("ae_network")
+        self.epochs = self.hyperparams.get("epochs", 10)
         self.hidden_units = config.get("hidden_units") * self.channels
         self.n_units = config.get("n_units")
         self.patch_size = config.get("patch_size")
@@ -284,11 +284,6 @@ class Trainer(object):
                 # ===================backward====================
                 loss.backward()
                 classifier_optimizer.step() # Updating parameters
-                # clear tensors and reclaim memory
-                # clear_tensors([enc_cat, outputs, loss])
-                # del enc_cat, outputs, loss
-                # gc.collect()
-                # torch.cuda.empty_cache()
 
             ######################    
             # validate the model #
@@ -306,11 +301,6 @@ class Trainer(object):
                     valid_loss = classifier_criterion(outputs, labels)
                     # record validation loss
                     valid_loss_values.append(valid_loss.item())
-                    # clear tensors and reclaim memory
-                    # clear_tensors([images, labels, enc_cat, outputs, valid_loss])
-                    # del enc_cat, outputs, valid_loss
-                    # gc.collect()
-                    # torch.cuda.empty_cache()
 
             # end of epoch
             logger.info("==> Testing ...")
@@ -369,11 +359,6 @@ class Trainer(object):
                 y_pred.extend(predicted.cpu().numpy())
                 total += labels.size(0)
                 tp_tn += (predicted == labels).sum()
-                # clear tensors and reclaim memory
-                # clear_tensors([images, labels, enc_cat, outputs])     
-                # del enc_cat, outputs
-                # gc.collect()
-                # torch.cuda.empty_cache()   
 
             logger.info("==> accuracy : {:.4f}".format(accuracy_score(y_test, y_pred)))
             accuracy = tp_tn.item() / total * 100
@@ -445,10 +430,6 @@ class Trainer(object):
                 # ==============================================
                 entropy[k].append({"epoch" : epoch+1, "h_bin" : h_bin})
                 # v['scheduler'].step()
-            # clear_tensors([acts_epoch, emap_epoch])
-            # del acts_epoch, emap_epoch
-            # gc.collect()
-            # torch.cuda.empty_cache()  
             #Implement Early Stopping for the Autoencs if the difference in re-const. error between previous
             #Epoch and this one is < 0.05
             #Contains the training loss of all the autoencs in this epoch
@@ -480,7 +461,7 @@ class Trainer(object):
         pass        
 
     def save_results(self, **kwargs):
-        if kwargs["result_type"] == "meta_network":
+        if kwargs["result_type"] == "ae_network":
             # create results/self.filename folder
             if not os.path.exists(self.results_path): os.mkdir(self.results_path)
             # save the non-parametric estimated entropy values

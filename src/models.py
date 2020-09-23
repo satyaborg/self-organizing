@@ -29,16 +29,6 @@ class Autoencoder(nn.Module):
         decoded = self.decoder(encoded)
         return encoded, decoded
 
-# class VanillaLogisticRegressionModel(nn.Module):
-#     """Standard Logistic Regressor"""
-#     def __init__(self, in_dim, classes):
-#         super(VanillaLogisticRegressionModel, self).__init__()
-#         self.linear = nn.Linear(in_dim, classes)
-
-#     def forward(self, x):
-#         y = self.linear(x) # F.sigmoid(self.linear(x))
-#         return y
-
 class LogisticRegressionModel(nn.Module):
     """Logistic Regressor"""
     def __init__(self, in_dim, classes, hidden_layers, activation_fn):

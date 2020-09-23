@@ -1,80 +1,72 @@
+import random
 import logging
+from src.trainer import Trainer
+import numpy as np
 
+PROB = {
+        'standard': lambda e, e_, k_, T=1 : 1 if (e_-e)>=0 else np.exp((e_-e)/(k_*T))
+        }
+SCHEDULE = {
+            'linear': lambda T, T_step : T - T_step,
+            'exp' : lambda T, T_step : T * T_step
+            }
 logger = logging.getLogger("train_log")
 
-class Meta(object):
+class Meta(Trainer):
+    """Meta class (inherits from Trainer)
+
+    Args:
+        Trainer ([type]): [description]
     """
-    Hill-climber (self.heuristic) :-
+    def __init__(self, **config):
+        """Hill-climber (self.heuristic) :-
         fchc : first choice hill climbing
         rw   : random walk
         shc  : stochastic hill climbing
         sa   : simulated annealing
-    """
-    def __init__(self, **config):
+        """
+        super(Meta, self).__init__(**config)
         # self, heuristic, k, h, w, erf_size, locs
-        self.autoencs = {}
-        config.get("seed", 42)
-        self.k = k
-        self.h = h
-        self.w = w
-        self.locs = locs
+        # general
+
+        # meta-learning hyperparameters
+        self.meta_hyperparams = config.get("meta_hyperparams")
+        self.erf_size = self.meta_hyperparams.get("erf_size") # [10,20]
+        self.heuristic = self.meta_hyperparams.get("heuristic")   # the hill-climbing algorithm
+        self.meta_steps = self.meta_hyperparams.get("meta_steps")
+        self.max_ptb = self.meta_hyperparams.get("max_ptb")
+        # self.h = h
+        # self.w = w
+        # self.locs = locs
+
         self.erfs = []           # a list of list of tuples; stores the old erf
         self.erfs_new = []
-        self.erf_size = erf_size # [10,20]
         self.alpha_new = 0       # alpha for current step
         self.alpha = []          # history of all accepted alphas
         self.beta = []
-        self.heuristic = heuristic   # the hill-climbing algorithm
         self.erf_hist = []      # history of all accepted rf's
         self.max_entropy = 0
         self.shift = 1
-        self.T = None
-        self.T_step = None
-        self.k_ = None
-        self.schedule = None
-        self.P = None
-        self.accept_prob_hist = []
+        
+        # self.T = 
+        # self.T_step = 
+        # self.k_ = 
+        
+        # self.accept_prob_hist = []
+        # self.P = 
+        # self.schedule = 
         
         print('Meta-heuristic chosen : {}'.format(self.heuristic))
         
     def __str__(self):
         pass
 
-    def init_sa(self, T, T_step, k_, schedule, P):
-        self.T = T
-        self.T_step = T_step
-        self.k_ = k_
-        self.schedule = schedule
-        self.P = P
-
-    def create_ae(self, patch_sizes, input_dim, hidden_units, dropout, wd, lr):
-        """
-        Method used for creating Autoencoder units dynamically.
-        Uses erfs_new - for locations of the effective receptive fields
-
-        args:        
-        patch_sizes - [(x, y), ..]
-        input_dim - input dimensions for the AE units
-        hidden_units - No of hidden units for the AE units
-        dropout - if dropout is to be applied
-        """
-        for i, loc in enumerate(self.locs):
-            x, y = patch_sizes[i][0], patch_sizes[i][1]
-            model = Autoencoder(input_size=input_dim, 
-                                hidden_units=hidden_units,
-                                dropout=dropout).to(device)
-
-            optim = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
-            
-            # object to store model attributes
-            self.autoencs['ae_'+str(i+1)] = {'model' : model,
-                                             'optim' : optim,
-                                             'x' : x,
-                                             'y' : y,
-                                             'erf' : self.erfs_new[i],
-                                             'loc' : loc,
-                                             'train_loss' : [],
-                                             'valid_loss' : []}
+    def init_sa(self):
+        self.T = self.meta_hyperparams.get("T_initial")
+        self.T_step = self.meta_hyperparams.get("T_step")
+        self.k_ = self.meta_hyperparams.get("k")
+        self.schedule = SCHEDULE[self.meta_hyperparams.get("schedule")]
+        self.P = PROB[self.meta_hyperparams.get("prob_function")]
 
     def alter_erf(self):
         # alter the receptive field
@@ -432,6 +424,7 @@ class Meta(object):
         self.alpha_new = alpha
         
     def meta_heuristic(self, meta, init=False, run=0, meta_step=0, init_topo=False, arch_count=0):
+
         """
         One step of the hill climbing algorithm
         Note that it is called from meta_loop, which also has important functionality for each 'step'.
@@ -440,12 +433,13 @@ class Meta(object):
 
         Returns TRUE if the step was accepted
         """
+
         accuracy_k, losses_k = None, None
         if init:
             if init_topo:
-                meta.init_topo(erfs_topo)     # set topology
+                self.init_topo(erfs_topo)     # set topology
             else:
-                meta.init_erf()               # random toppology
+                self.init_erf()               # random toppology
         else:
             meta.rand_shift()                 # perturb receptive field positions
             if cleared_weights == 0:   # ie. weights preserved.  
@@ -470,19 +464,7 @@ class Meta(object):
             logging.info("--> step INITIAL")
             meta.set_accept()
             meta.accept_prob_hist.append(1.0)
-    plot_topology(encoding_map, meta.erfs, units=meta.k, run=run, 
-                            step=meta_step, export=True)
-            ret = True
-        elif meta.meta_obj():
-            logging.info("--> step ACCEPTED")
-            meta.set_accept()
 
-            # plot the accepted receptive field positions
-            # note: looks like it overrides, so only 1 for each meta_step
-            if logging_topology_maps:
-                plot_topology(encoding_map, meta.erfs, units=meta.k, run=run, 
-                            step=meta_step, export=True)
-            ret = True
             # note: looks like it overrides, so only 1 for each meta_step
             if logging_topology_maps:
                 plot_topology(encoding_map, meta.erfs, units=meta.k, run=run, 
@@ -498,16 +480,54 @@ class Meta(object):
                 plot_topology(encoding_map, meta.erfs, units=meta.k, run=run, 
                             step=meta_step, export=True)
             ret = True
+        else:
+            logging.info("--> step REJECTED")
+            meta.set_reject()
+            # plot the rejected receptive field positions
+            if logging_topology_maps:
+                plot_topology(encoding_map, meta.erfs_new)
+            ret = False
+
+        if logging_topology_graphs:
+            call_visualise(meta.locs, meta.autoencs, units=meta.k, run=run, step=meta_step)
+
+        del encoding_map
+        gc.collect()    
+
+        return ret
 
     def is_calc_accuracy(self, accepted, init, m_step, rand_ptb_step):
 
         if not calc_accuracy:
-        return False
+            return False
 
         once_per_temp = True
         if once_per_temp:
-        if init or rand_ptb_step == (max_ptb-1):   # initial arch or last ptb of meta-step (temp)
-            return True
+            if init or rand_ptb_step == (max_ptb-1):   # initial arch or last ptb of meta-step (temp)
+                return True
         elif accepted:
             return True
         return False
+
+    def test_arch_k(locs, autoencs):
+        print('Testing arch')
+        # in_dim = k * 10 * 10
+        #logit_model = LogisticRegressionModel(k*x*y, classes).cuda()
+
+        logit_model = LogisticRegressionModel_1(
+            k*x*y, classes, hidden_layers, nn.ReLU(inplace=True)).to(device)
+
+        logit_criterion = nn.CrossEntropyLoss()
+        logit_optimizer = torch.optim.Adam(logit_model.parameters(), lr=lr, 
+                                            weight_decay=wd)
+        # plot_train_loss(train_loss)
+
+        # training logistic regression model
+        valid_losses, losses, accuracy = logit_train(epochs_logit, logit_model, 
+                                                    logit_optimizer, 
+                                                    logit_criterion, autoencs, 
+                                                    h=h, w=w, 
+                                                    patience=early_stop_pat)
+        # plot_logistic_loss(losses=losses) 
+
+        return accuracy, losses

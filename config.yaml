@@ -11,9 +11,9 @@ early_stop: False
 bins: 100 # 1000 is optimal (?)
 
 # variable arguments
-training_mode: handcrafted # options: handcrafted, meta_learning
-ae_units: [5, 3] # a list of units
-runs: 1
+training_mode: meta_learning # options: handcrafted, meta_learning
+ae_units: [3, 5, 7] # list of units
+runs: 3
 
 # datasets
 # MNIST -- comment this if using CIFAR10
@@ -38,7 +38,7 @@ paths:
 
 # training hyperparams
 hyperparams:
-  meta_network:
+  ae_network:
     epochs: 2 # 100
     batch_size: 128 # 32
     valid_pct: 0.2
@@ -53,27 +53,29 @@ hyperparams:
     lr: 0.01 # 0.001
     wd: 0.0001 # 1e-04
     num_layers: 1
-    
-# meta:
-#   heuristic: fchc, # options: fchc, rw, shc, sa
-#   seed: 42,
-#   dataset: mnist,
-#   cuda: 1,
-#   num_runs: 3,
-#   early_stop: 1,
-#   meta_steps: 20,
-#   num_layers: 2,
-#   units: [7],
-#   local_entropy: 0,
-#   cleared_weights: 0,
-#   hill_climber: sa,
-#   prob_function: standard,
-#   schedule: exp,
-#   T_initial: 8,
-#   T_final: 0.01,
-#   T_step: 0,
-#   k: 0.25,
-#   max_ptb: 10,
-#   epochs_ae: 2,
-#   epochs_logit: 2,
-#   calc_accuracy: true   
+  
+# hyperparameters used for meta-learning
+meta_hyperparams:
+  heuristic: sa # options: fchc, rw, shc, sa
+  erf_size: [10, 20]
+  # seed: 42,
+  # dataset: mnist,
+  # cuda: 1,
+  # num_runs: 3,
+  # early_stop: 1,
+  meta_steps: 20
+  # num_layers: 2,
+  # units: [7],
+  local_entropy: 0
+  cleared_weights: 0
+  hill_climber: sa
+  prob_function: standard
+  schedule: exp
+  T_initial: 8
+  T_final: 0.01
+  T_step: 0
+  k: 0.25
+  max_ptb: 10
+  # epochs_ae: 2,
+  # epochs_logit: 2,
+  calc_accuracy: true

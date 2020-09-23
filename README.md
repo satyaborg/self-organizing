@@ -3,38 +3,21 @@ Research into self organizing hierarchies for artificial neural networks.
 
 ## Contents
 
-1. `handcrafted-topologies.ipynb` contains the implementation of the handcrafted architectures, logistic regression and autoencoder models. Also includes the training pipeline for the meta-network along with its sub-units.
+```
+virtualenv -p python3 venv
+source venv/bin/activate
+chmod +x train.sh 
+./train.sh
+```
 
-- 3 AE units
-![alt text](/images/3-units.png)
-
-- 5 AE units
-![alt text](/images/5-units.png)
-
-- 7 AE units
-![alt text](/images/7-units.png)
-
-- Forward pass of the meta-network
-![alt text](/images/feature-map.png)
-
-2. `correlation-analysis.ipynb` contains accuracy vs entropy correlation analysis with data generated from `handcrafted-topologies.ipynb`
-
-> Note : `correlation-analysis.ipynb` has yet to be commited.
-
-![alt text](/images/regressed.png)
-
-
-3. `meta-learning.ipynb` contains the implementation of meta-heuristics and the overall meta-learning pipeline.
-
-- Accuracy vs Meta-step
-![alt text](/images/meta-learned-1.png)
-
-- Entropy vs Meta-step
-![alt text](/images/meta-learned-2.png)
+## Results
+|Units|Arch|Meta-steps|Accuracy|
+|----|----|----|----|
+|3|Pyramidal|20|92.5|
 
 ## TODO
 
 - [x] Refactor the training of handcrafted architectures 
 - [x] Handle both single and multi-channel inputs (CIFAR10)
 - [x] Add code profiler
-- [ ] Refactor the meta-learner
+- [ ] Refactor the meta-learner: Simulated Annealing

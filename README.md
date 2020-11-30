@@ -19,11 +19,15 @@ chmod +x train.sh
 
 ## Results
 
+- Accuracy vs Max Entropy (global)
 ![alt feature map](images/accuracy-entropy.png)
 
-|Units|Arch|Meta-steps|Accuracy|
+- Accuracy vs Meta-steps
+![alt feature map](images/meta.png)
+
+<!-- |Units|Arch|Meta-steps|Accuracy|
 |----|----|----|----|
-|3|Pyramidal|20|92.5|
+|3|Pyramidal|20|92.5| -->
 
 ## TODO
 

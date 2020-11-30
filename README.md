@@ -1,9 +1,11 @@
 # self-organizing
 Research into self organizing hierarchies for artificial neural networks.
 
-Our paper (accepted at AJCAI 2020) can be found [here](https://github.com/satyaborg/self-organizing/tree/master/paper/self_organising_neural_network_hierarchy.pdf).
+## Key highlights
+- Accepted at AJCAI 2020. [[paper](https://github.com/satyaborg/self-organizing/tree/master/paper/self_organising_neural_network_hierarchy.pdf)]
+- Accepted at NAISys 2020 for poster presentation. [[poster](https://meetings.cshl.edu/posters/naisys20/images/viewer.html?file=naisys_20_58.pdf)]
 
-## Contents
+## Installation
 
 To install the dependencies and train, execute the following:
 ```
